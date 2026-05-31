@@ -16,8 +16,7 @@ cyber-shield-live/
 ├── sqli-labs/               # Aplicação vulnerável a SQL Injection (PHP + MySQL)
 ├── nosql-labs/              # Aplicação vulnerável a NoSQL Injection (Node.js + MongoDB)
 ├── nginx-modsecurity/       # Proxy reverso com Nginx + ModSecurity + CRS
-├── coraza/                  # Proxy reverso com Coraza (WAF em Go) + regras CRS adaptadas
-└── README.md                # Este arquivo
+├── coraza/                  # Proxy reverso com Coraza (WAF em Go) + regras CRS adaptadas 
 ```
 
 ---
