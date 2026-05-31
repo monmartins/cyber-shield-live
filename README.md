@@ -60,7 +60,7 @@ cd nginx-modsecurity
 docker-compose up -d
 ```
 
-O WAF escutará em `http://localhost:80` e fará proxy para a aplicação vulnerável (que deve estar rodando).  
+O WAF escutará em diferentes portas, dependendo da configuração no arquivo compose.yml e fará proxy para a aplicação vulnerável (que deve estar rodando).  
 Ajuste o `proxy_pass` no arquivo de configuração do Nginx para apontar para o endereço da aplicação desejada.
 
 ### 4. Com WAF Coraza (proxy em Go)
@@ -70,7 +70,7 @@ cd coraza
 docker-compose up -d
 ```
 
-Coraza escuta em `http://localhost:8090` e aplica as regras CRS antes de encaminhar para o backend vulnerável.
+Coraza escuta em diferentes portas, dependendo da configuração no arquivo compose.yml e aplica as regras CRS antes de encaminhar para o backend vulnerável.
 
 ---
 
