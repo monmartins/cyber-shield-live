@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-dot"></span>People<span>Dir</span></a>
+  <nav>
+    <a href="/lookup">Find Employee</a>
+    <a href="/docs">Security Notes</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>Employee Directory</h1>
+  <p>Find colleagues, explore departments and connect with your team.</p>
+  <form class="search-hero" method="get" action="/lookup">
+    <input type="text" name="user" placeholder="Search by username…" autocomplete="off">
+    <button type="submit">Find</button>
+  </form>
+</div>
+
+<main>
+  <div class="section-head">
+    <h2>All Employees</h2>
+    <span>{{len .Data}} people</span>
+  </div>
+
+  <div class="grid">
+    {{range .Data}}
+    <div class="emp-card" data-username="{{.Username}}">
+      <div class="emp-avatar" data-initials="{{.Name}}"></div>
+      <div class="emp-name">{{.Name}}</div>
+      <div class="emp-role">{{.Role}}</div>
+      <span class="emp-dept">{{.Department}}</span>
+      <div style="margin-top:.7rem">
+        {{range .Skills}}<span class="skill-chip">{{.}}</span>{{end}}
+      </div>
+    </div>
+    {{else}}
+    <p class="empty">No employees found.</p>
+    {{end}}
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 PeopleDir &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

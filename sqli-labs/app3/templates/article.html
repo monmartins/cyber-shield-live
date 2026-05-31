@@ -1,0 +1,51 @@
+{{define "article.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – NewsHub</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">News<span>Hub</span></a>
+  <nav>
+    <a href="/articles?cat=Politics">Politics</a>
+    <a href="/articles?cat=Technology">Technology</a>
+    <a href="/articles?cat=Economy">Economy</a>
+    <a href="/tags?tag=breaking">Breaking</a>
+    <a href="/comment" class="cta">Discuss</a>
+  </nav>
+</header>
+<main class="article-main">
+  {{if .Error}}
+  <div class="not-found-box">
+    <div class="not-found-icon">📰</div>
+    <h2>Article Not Found</h2>
+    <p>{{.Error}}</p>
+    <a href="/" class="btn btn-accent">Back to Home</a>
+  </div>
+  {{else if .Data}}
+  <article class="article-body">
+    <div class="article-cat">{{.Data.Category}}</div>
+    <h1>{{.Data.Title}}</h1>
+    <div class="article-meta">By <strong>{{.Data.Author}}</strong> &nbsp;·&nbsp; {{.Data.Date}}</div>
+    <div class="article-content">
+      <p>{{.Data.Content}}</p>
+    </div>
+    <div class="article-actions">
+      <a href="/comment" class="btn btn-accent">Leave a Comment</a>
+      <a href="/" class="btn btn-ghost">← All Articles</a>
+    </div>
+  </article>
+  {{else}}
+  <p class="empty">Loading…</p>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 NewsHub Media Group &nbsp;|&nbsp; <a href="/docs">Editorial Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

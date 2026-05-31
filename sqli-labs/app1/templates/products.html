@@ -1,0 +1,58 @@
+{{define "products.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav>
+    <a href="/products?category=Electronics">Electronics</a>
+    <a href="/products?category=Sports">Sports</a>
+    <a href="/products?category=Books">Books</a>
+    <a href="/products?category=Clothing">Clothing</a>
+    <a href="/search">Search</a>
+    <a href="/login" class="cta">Sign In</a>
+  </nav>
+</header>
+<main>
+  {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+  <div class="section-head">
+    <h2>{{if .Data.Category}}Category: {{.Data.Category}}{{else}}All Products{{end}}</h2>
+  </div>
+
+  <div class="tabs">
+    <a href="/products?category=Electronics">Electronics</a>
+    <a href="/products?category=Sports">Sports</a>
+    <a href="/products?category=Books">Books</a>
+    <a href="/products?category=Clothing">Clothing</a>
+  </div>
+
+  {{if .Data.Rows}}
+  <div class="grid">
+    {{range .Data.Rows}}
+    <div class="card">
+      <div class="card-body">
+        <h3>{{index . 1}}</h3>
+        <p class="desc">{{index . 2}}</p>
+        <div class="price">R$ {{index . 3}}</div>
+        <span class="badge">{{index . 4}}</span>
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <p style="color:var(--muted);margin-top:2rem;">No products found in this category.</p>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 ShopFlow &nbsp;|&nbsp; <a href="/docs">Docs</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

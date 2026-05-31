@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    container_name: nosql_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./app1/seed.js:/docker-entrypoint-initdb.d/01_app1.js:ro
+      - ./app2/seed.js:/docker-entrypoint-initdb.d/02_app2.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app1:
+    build: ./app1
+    image: app1:nosql-waf
+    container_name: nosql_app1
+    ports:
+      - "8081:8081"
+    environment:
+      PORT: "8081"
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_DB: "app1_db"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  app2:
+    build: ./app2
+    image: app2:nosql-waf
+    container_name: nosql_app2
+    ports:
+      - "8082:8082"
+    environment:
+      PORT: "8082"
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_DB: "app2_db"
+    depends_on:
+      mongo:
+        condition: service_healthy

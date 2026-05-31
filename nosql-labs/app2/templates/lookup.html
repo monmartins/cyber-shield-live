@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-dot"></span>People<span>Dir</span></a>
+  <nav>
+    <a href="/lookup" class="active">Find Employee</a>
+    <a href="/docs">Security Notes</a>
+  </nav>
+</header>
+
+<main>
+  <div class="lookup-wrap">
+    <h1>Find Employee</h1>
+    <p class="lookup-desc">Enter a username to retrieve the employee's public profile.</p>
+
+    <form class="lookup-bar" method="get" action="/lookup">
+      <input type="text" name="user" placeholder="e.g. jdoe" value="{{.Query}}" autocomplete="off">
+      <button type="submit">Search</button>
+    </form>
+    <p class="api-hint">Programmatic access: <a href="/api/lookup?user={{.Query}}">/api/lookup?user={{.Query}}</a></p>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    {{if .Employee}}
+    {{with .Employee}}
+    <div class="profile-card">
+      <div class="emp-avatar" style="width:56px;height:56px;font-size:1.3rem;margin-bottom:.8rem" data-initials="{{.Name}}"></div>
+      <div class="profile-name">{{.Name}}</div>
+      <div class="profile-role">{{.Role}}</div>
+      <span class="profile-dept">{{.Department}}</span>
+      <p class="profile-bio">{{.Bio}}</p>
+      <div class="profile-skills">
+        <h4>Skills</h4>
+        {{range .Skills}}<span class="skill-chip">{{.}}</span>{{end}}
+      </div>
+    </div>
+    <a href="/employee?id={{.Username}}" style="color:var(--accent);font-size:.85rem;text-decoration:none">View full profile →</a>
+    {{end}}
+    {{end}}
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 PeopleDir &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+:root {
+  --primary: #dc2626;
+  --primary-dark: #b91c1c;
+  --primary-light: #fee2e2;
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface2: #334155;
+  --border: #334155;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --accent: #f59e0b;
+  --success-bg: #065f46; --success-text: #6ee7b7;
+  --error-bg: #7f1d1d; --error-text: #fca5a5;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+header { background: #0f172a; border-bottom: 3px solid var(--primary); height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 100; }
+.logo { font-size: 1.6rem; font-weight: 800; text-decoration: none; color: var(--text); font-family: Georgia, serif; }
+.logo span { color: var(--primary); }
+nav { display: flex; gap: .25rem; }
+nav a { color: var(--muted); text-decoration: none; padding: .4rem .85rem; border-radius: 6px; font-size: .875rem; font-family: sans-serif; transition: color .15s, background .15s; }
+nav a:hover { color: var(--text); background: var(--surface2); }
+nav a.cta { background: var(--primary); color: #fff; font-weight: 600; }
+nav a.cta:hover { background: var(--primary-dark); }
+
+main { max-width: 1100px; margin: 2rem auto; padding: 0 1.25rem; }
+
+.breaking { background: var(--primary); color: #fff; padding: .4rem 1.25rem; font-size: .875rem; font-family: sans-serif; font-weight: 600; border-radius: 4px; display: inline-block; margin-bottom: 1.5rem; }
+
+.cat-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+.cat-tabs a { padding: .4rem .9rem; border-radius: 4px; font-size: .875rem; text-decoration: none; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: sans-serif; transition: all .15s; }
+.cat-tabs a:hover, .cat-tabs a.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.news-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; }
+.news-item { background: var(--surface); padding: 1.25rem 1.5rem; transition: background .15s; }
+.news-item:hover { background: var(--surface2); }
+.news-item h3 { font-size: 1.05rem; margin-bottom: .25rem; }
+.news-item .meta { font-size: .8rem; color: var(--muted); font-family: sans-serif; }
+.news-item .cat-badge { display: inline-block; font-size: .7rem; padding: .15rem .5rem; border-radius: 3px; background: var(--primary); color: #fff; font-family: sans-serif; font-weight: 600; margin-right: .5rem; text-transform: uppercase; }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.75rem; margin-bottom: 1.5rem; }
+.panel h2 { font-size: 1.2rem; margin-bottom: 1rem; font-family: sans-serif; color: var(--accent); }
+
+.tag-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem; }
+.tag-pills a { padding: .35rem .8rem; background: var(--surface2); border-radius: 20px; font-size: .85rem; text-decoration: none; color: var(--muted); font-family: sans-serif; transition: all .15s; }
+.tag-pills a:hover { background: var(--primary); color: #fff; }
+
+.article-body { max-width: 760px; }
+.article-body h1 { font-size: 2rem; margin-bottom: .5rem; line-height: 1.3; }
+.article-meta { color: var(--muted); font-size: .875rem; font-family: sans-serif; margin-bottom: 1.5rem; }
+.article-content { font-size: 1.05rem; line-height: 1.8; }
+
+.field { margin-bottom: 1.1rem; }
+.field label { display: block; font-size: .875rem; font-weight: 600; margin-bottom: .4rem; font-family: sans-serif; color: var(--muted); }
+.field input, .field select, .field textarea { width: 100%; padding: .65rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; background: var(--surface2); color: var(--text); font-family: Georgia, serif; transition: border-color .2s; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); }
+.field textarea { min-height: 100px; resize: vertical; }
+
+.btn { display: inline-flex; align-items: center; padding: .65rem 1.4rem; border-radius: 8px; font-size: .95rem; font-weight: 600; cursor: pointer; border: none; transition: background .15s; font-family: sans-serif; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+
+.alert { padding: .85rem 1.1rem; border-radius: 8px; font-size: .9rem; margin-bottom: 1.25rem; font-family: sans-serif; }
+.alert-error { background: var(--error-bg); color: var(--error-text); font-family: monospace; font-size: .85rem; white-space: pre-wrap; }
+.alert-success { background: var(--success-bg); color: var(--success-text); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; font-family: sans-serif; }
+th { padding: .7rem 1rem; text-align: left; font-weight: 600; color: var(--accent); font-size: .8rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+td { padding: .7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); word-break: break-all; }
+tr:hover td { background: var(--surface2); }
+
+.docs { max-width: 800px; }
+.docs h1 { font-size: 1.7rem; margin-bottom: .5rem; font-family: sans-serif; }
+.docs .sub { color: var(--muted); margin-bottom: 2rem; font-family: sans-serif; }
+.vuln-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
+.vuln-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; font-family: sans-serif; display: flex; gap: .5rem; align-items: center; }
+.tag { font-size: .72rem; padding: .18rem .5rem; border-radius: 4px; font-weight: 700; font-family: sans-serif; }
+.tag.union { background: #4c1d95; color: #c4b5fd; }
+.tag.blind { background: #1e3a5f; color: #93c5fd; }
+.vuln-card p { font-size: .875rem; color: var(--muted); margin-bottom: .75rem; font-family: sans-serif; }
+.code-block { background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 8px; font-family: monospace; font-size: .82rem; overflow-x: auto; white-space: pre-wrap; border: 1px solid var(--border); }
+
+footer { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); margin-top: 4rem; font-family: sans-serif; }
+footer a { color: var(--primary); text-decoration: none; }

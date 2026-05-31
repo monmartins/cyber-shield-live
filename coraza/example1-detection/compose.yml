@@ -1,0 +1,211 @@
+version: '3.9'
+
+# ─── Exemplo 1: Coraza em DETECÇÃO ────────────────────────────────────────────
+# SecRuleEngine DetectionOnly — ataques são LOGADOS mas NÃO bloqueados.
+# As aplicações permanecem vulneráveis. Útil para:
+#   - Avaliar o volume de falsos positivos antes de ligar o bloqueio
+#   - Entender quais regras CRS seriam disparadas
+#   - Treinar e calibrar regras customizadas
+#
+# Acesso:
+#   ShopFlow    http://localhost:8081  (SQLi VULN-1..4)
+#   LibroBase   http://localhost:8082  (SQLi VULN-5..8)
+#   NewsHub     http://localhost:8083  (SQLi VULN-9..12)
+#   StaffPortal http://localhost:8084  (SQLi VULN-13..16)
+#   StockTrack  http://localhost:8085  (SQLi VULN-17..18)
+#   CipherNote  http://localhost:9081  (NoSQL VULN-A,B)
+#   PeopleDir   http://localhost:9082  (NoSQL VULN-C,D)
+
+services:
+
+  # ── Coraza WAF (Caddy + plugin coraza-caddy) ────────────────────────────────
+  coraza_waf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coraza_detection_waf
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - coraza_logs:/var/log/caddy
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+      - "8084:8084"
+      - "8085:8085"
+      - "9081:9081"
+      - "9082:9082"
+    depends_on:
+      - sqli_app1
+      - sqli_app2
+      - sqli_app3
+      - sqli_app4
+      - sqli_app5
+      - nosql_app1
+      - nosql_app2
+    networks:
+      - lab_net
+
+  # ── PostgreSQL (para os 5 apps SQLi) ────────────────────────────────────────
+  sqli_postgres:
+    image: postgres:15-alpine
+    container_name: coraza1_postgres
+    environment:
+      POSTGRES_USER: sqliuser
+      POSTGRES_PASSWORD: sqlipass
+      POSTGRES_DB: postgres
+    volumes:
+      - ../../sqli-labs/pg-init:/docker-entrypoint-initdb.d
+      - sqli_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sqliuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lab_net
+
+  # ── SQLi App1 — ShopFlow ─────────────────────────────────────────────────────
+  sqli_app1:
+    build:
+      context: ../../sqli-labs/app1
+    container_name: coraza1_sqli_app1
+    environment:
+      DB_HOST: sqli_postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app1_db
+      DB_PORT: "5432"
+      PORT: "8081"
+    depends_on:
+      sqli_postgres:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── SQLi App2 — LibroBase ────────────────────────────────────────────────────
+  sqli_app2:
+    build:
+      context: ../../sqli-labs/app2
+    container_name: coraza1_sqli_app2
+    environment:
+      DB_HOST: sqli_postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app2_db
+      DB_PORT: "5432"
+      PORT: "8082"
+    depends_on:
+      sqli_postgres:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── SQLi App3 — NewsHub ──────────────────────────────────────────────────────
+  sqli_app3:
+    build:
+      context: ../../sqli-labs/app3
+    container_name: coraza1_sqli_app3
+    environment:
+      DB_HOST: sqli_postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app3_db
+      DB_PORT: "5432"
+      PORT: "8083"
+    depends_on:
+      sqli_postgres:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── SQLi App4 — StaffPortal ──────────────────────────────────────────────────
+  sqli_app4:
+    build:
+      context: ../../sqli-labs/app4
+    container_name: coraza1_sqli_app4
+    environment:
+      DB_HOST: sqli_postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app4_db
+      DB_PORT: "5432"
+      PORT: "8084"
+    depends_on:
+      sqli_postgres:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── SQLi App5 — StockTrack ───────────────────────────────────────────────────
+  sqli_app5:
+    build:
+      context: ../../sqli-labs/app5
+    container_name: coraza1_sqli_app5
+    environment:
+      DB_HOST: sqli_postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app5_db
+      DB_PORT: "5432"
+      PORT: "8085"
+    depends_on:
+      sqli_postgres:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── MongoDB (para os 2 apps NoSQL) ──────────────────────────────────────────
+  nosql_mongo:
+    image: mongo:6
+    container_name: coraza1_mongo
+    volumes:
+      - ../../nosql-labs/app1/seed.js:/docker-entrypoint-initdb.d/01_app1.js:ro
+      - ../../nosql-labs/app2/seed.js:/docker-entrypoint-initdb.d/02_app2.js:ro
+      - nosql_mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lab_net
+
+  # ── NoSQL App1 — CipherNote ──────────────────────────────────────────────────
+  nosql_app1:
+    build:
+      context: ../../nosql-labs/app1
+    container_name: coraza1_nosql_app1
+    environment:
+      PORT: "8081"
+      MONGO_URI: "mongodb://nosql_mongo:27017"
+      MONGO_DB: "app1_db"
+    depends_on:
+      nosql_mongo:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+  # ── NoSQL App2 — PeopleDir ───────────────────────────────────────────────────
+  nosql_app2:
+    build:
+      context: ../../nosql-labs/app2
+    container_name: coraza1_nosql_app2
+    environment:
+      PORT: "8082"
+      MONGO_URI: "mongodb://nosql_mongo:27017"
+      MONGO_DB: "app2_db"
+    depends_on:
+      nosql_mongo:
+        condition: service_healthy
+    networks:
+      - lab_net
+
+networks:
+  lab_net:
+    driver: bridge
+
+volumes:
+  sqli_pgdata:
+  nosql_mongodata:
+  coraza_logs:

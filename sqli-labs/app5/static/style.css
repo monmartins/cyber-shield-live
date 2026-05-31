@@ -1,0 +1,117 @@
+/* ── StockTrack – Orange Industrial Theme ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #faf6f0;
+  --surface:  #ffffff;
+  --accent:   #d45a00;
+  --accent2:  #f07820;
+  --muted:    #7a6a58;
+  --text:     #1e1408;
+  --border:   #e8d8c8;
+  --danger:   #c0392b;
+  --success:  #1a6b3a;
+  --radius:   8px;
+  --shadow:   0 2px 12px rgba(212,90,0,.10);
+}
+
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Header ── */
+header {
+  background: #1e1408;
+  padding: .9rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.logo { color: #fff; font-size: 1.35rem; font-weight: 700; text-decoration: none; letter-spacing: -.5px; }
+.logo span { color: var(--accent2); }
+nav { display: flex; gap: 1.2rem; align-items: center; }
+nav a { color: rgba(255,255,255,.75); text-decoration: none; font-size: .9rem; transition: color .2s; }
+nav a:hover, nav a.active { color: #fff; }
+nav a.cta { background: var(--accent); color: #fff; padding: .35rem .9rem; border-radius: 20px; font-weight: 600; font-size: .85rem; }
+nav a.cta:hover { background: var(--accent2); }
+
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(135deg, #1e1408 0%, #3a2400 100%);
+  color: #fff;
+  padding: 3rem 2rem;
+  border-bottom: 4px solid var(--accent);
+}
+.hero-inner { max-width: 700px; }
+.hero-badge { display: inline-block; background: var(--accent); color: #fff; font-size: .75rem; font-weight: 700; padding: .2rem .7rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: .8rem; }
+.hero h1 { font-size: 2rem; margin-bottom: .6rem; }
+.hero p { color: rgba(255,255,255,.75); margin-bottom: 1.5rem; }
+
+/* ── Main ── */
+main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem; }
+
+.section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: .5rem; }
+.section-head h2 { font-size: 1.1rem; color: var(--text); }
+.section-head a { font-size: .85rem; color: var(--accent); text-decoration: none; }
+
+/* ── Inventory table ── */
+.data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); font-size: .88rem; margin-bottom: 1.5rem; }
+.data-table th { background: #1e1408; color: #fff; padding: .7rem 1rem; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
+.data-table td { padding: .65rem 1rem; border-bottom: 1px solid var(--border); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #fdf0e5; }
+
+/* ── SKU lookup form ── */
+.lookup-bar { display: flex; gap: .6rem; margin-bottom: 1.5rem; }
+.lookup-bar input { flex: 1; padding: .65rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: .92rem; outline: none; }
+.lookup-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,90,0,.15); }
+.lookup-bar button { background: var(--accent); color: #fff; border: none; padding: .65rem 1.3rem; border-radius: var(--radius); cursor: pointer; font-weight: 600; }
+.lookup-bar button:hover { background: var(--accent2); }
+
+.stock-badge { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: .15rem .5rem; font-size: .75rem; font-weight: 700; color: var(--accent); }
+.stock-low { color: var(--danger); border-color: var(--danger); }
+
+/* ── XML console ── */
+.xml-console { background: #1e1408; border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem; }
+.xml-console-header { background: #2e2010; padding: .6rem 1rem; font-size: .78rem; color: rgba(255,255,255,.6); display: flex; justify-content: space-between; }
+.xml-console textarea { width: 100%; background: transparent; color: #f0c888; border: none; padding: 1rem; font-family: monospace; font-size: .85rem; resize: vertical; min-height: 140px; outline: none; }
+.xml-console-footer { padding: .6rem 1rem; display: flex; gap: .6rem; justify-content: flex-end; }
+.xml-result { background: #0e0a04; border-radius: var(--radius); padding: 1rem; font-family: monospace; font-size: .82rem; color: #c0d890; margin-bottom: 1rem; min-height: 60px; white-space: pre-wrap; word-break: break-all; }
+
+/* ── OOB Log ── */
+.oob-log { background: #1e1408; color: #f0c888; border-radius: var(--radius); padding: 1.2rem; font-family: monospace; font-size: .82rem; max-height: 480px; overflow-y: auto; margin-bottom: 1.5rem; }
+.oob-log .oob-entry { padding: .35rem 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.oob-log .oob-ts { color: #a07840; font-size: .75rem; }
+
+/* ── Alerts ── */
+.alert { padding: .8rem 1.1rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: .9rem; }
+.alert-success { background: #d1fae5; color: var(--success); border: 1px solid #a7f3d0; }
+.alert-error { background: #fde8e8; color: var(--danger); border: 1px solid #f9b8b8; font-family: monospace; white-space: pre-wrap; word-break: break-all; }
+
+.empty { color: var(--muted); text-align: center; padding: 2rem 0; }
+.page-header { margin-bottom: 1.5rem; }
+.page-header h1 { font-size: 1.4rem; }
+
+/* ── Docs ── */
+.docs-main { max-width: 860px; }
+.docs-main h1 { font-size: 1.5rem; margin-bottom: .4rem; }
+.docs-intro { color: var(--muted); margin-bottom: 2rem; }
+.vuln-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 1.2rem; box-shadow: var(--shadow); }
+.vuln-card.info { border-left-color: var(--accent2); }
+.vuln-header { display: flex; gap: .8rem; align-items: center; margin-bottom: .8rem; }
+.vuln-id { background: var(--accent); color: #fff; border-radius: 4px; padding: .2rem .6rem; font-size: .78rem; font-weight: 700; }
+.vuln-type { font-weight: 600; font-size: .95rem; }
+pre { background: #1e1408; color: #f0c888; border-radius: 6px; padding: 1rem; font-size: .82rem; overflow-x: auto; margin-top: .8rem; }
+code { font-family: monospace; }
+p { margin-bottom: .5rem; line-height: 1.6; }
+
+/* ── Buttons ── */
+.btn { display: inline-block; padding: .55rem 1.2rem; border-radius: var(--radius); font-size: .9rem; font-weight: 600; text-decoration: none; cursor: pointer; border: 2px solid transparent; transition: all .15s; }
+.btn-accent { background: var(--accent); color: #fff; border: none; }
+.btn-accent:hover { background: var(--accent2); }
+.btn-ghost { border-color: var(--accent); color: var(--accent); background: transparent; }
+.btn-ghost:hover { background: var(--accent); color: #fff; }
+.btn-sm { padding: .35rem .8rem; font-size: .82rem; }
+
+/* ── Footer ── */
+footer { background: #1e1408; color: rgba(255,255,255,.6); text-align: center; padding: 1rem; font-size: .82rem; margin-top: auto; }
+footer a { color: rgba(255,255,255,.8); }

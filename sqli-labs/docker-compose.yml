@@ -1,0 +1,97 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: sqliuser
+      POSTGRES_PASSWORD: sqlipass
+      POSTGRES_DB: postgres
+    volumes:
+      - ./pg-init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sqliuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app1:
+    build: ./app1
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app1_db
+      DB_PORT: "5432"
+      PORT: "8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app2:
+    build: ./app2
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app2_db
+      DB_PORT: "5432"
+      PORT: "8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app3:
+    build: ./app3
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app3_db
+      DB_PORT: "5432"
+      PORT: "8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app4:
+    build: ./app4
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app4_db
+      DB_PORT: "5432"
+      PORT: "8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app5:
+    build: ./app5
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: postgres
+      DB_USER: sqliuser
+      DB_PASSWORD: sqlipass
+      DB_NAME: app5_db
+      DB_PORT: "5432"
+      PORT: "8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

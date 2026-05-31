@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-icon">📓</span>Cipher<span>Note</span></a>
+  <nav>
+    <a href="/search">Search</a>
+    <a href="/login" class="btn-nav active">Sign In</a>
+  </nav>
+</header>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to access your team's knowledge base.</p>
+
+      <div id="login-msg" class="alert" style="display:none"></div>
+
+      <form id="login-form">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Your username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Your password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 CipherNote &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

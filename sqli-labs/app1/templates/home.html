@@ -1,0 +1,64 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Shop<span>Flow</span></a>
+  <nav>
+    <a href="/products?category=Electronics">Electronics</a>
+    <a href="/products?category=Sports">Sports</a>
+    <a href="/products?category=Books">Books</a>
+    <a href="/search">Search</a>
+    {{if .Data.User}}
+      <a href="/logout">Sign out ({{.Data.User}})</a>
+    {{else}}
+      <a href="/login" class="cta">Sign In</a>
+    {{end}}
+  </nav>
+</header>
+<main>
+  {{if .Data.User}}
+  <div class="alert alert-success">Welcome back, <strong>{{.Data.User}}</strong>!</div>
+  {{end}}
+
+  <section class="hero">
+    <h1>Your One-Stop<br>Online Store</h1>
+    <p>Discover the latest in electronics, fashion, books and more — all in one place.</p>
+    <div class="hero-btns">
+      <a href="/products?category=Electronics" class="btn btn-accent">Shop Now</a>
+      <a href="/promo" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.6)">Promo Codes</a>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Featured Products</h2>
+    <a href="/products">View all →</a>
+  </div>
+
+  <div class="grid">
+    {{range .Data.Rows}}
+    <div class="card">
+      <div class="card-body">
+        <h3>{{index . 1}}</h3>
+        <p class="desc">{{index . 2}}</p>
+        <div class="price">R$ {{index . 3}}</div>
+        <span class="badge">{{index . 4}}</span>
+      </div>
+    </div>
+    {{else}}
+    <p style="color:var(--muted)">No products available.</p>
+    {{end}}
+  </div>
+</main>
+<footer>
+  <p>© 2024 ShopFlow. All rights reserved. &nbsp;|&nbsp; <a href="/docs">API Docs</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

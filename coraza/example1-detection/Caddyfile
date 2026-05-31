@@ -1,0 +1,86 @@
+{
+    order coraza_waf first
+}
+
+# ─── Snippet reutilizável: Coraza em modo DETECÇÃO (sem bloquear) ──────────────
+(coraza_detection) {
+    coraza_waf {
+        load_owasp_crs
+        directives `
+            Include @coraza.conf-recommended
+            Include @crs-setup.conf.example
+            SecRuleEngine DetectionOnly
+            SecAuditLog /var/log/caddy/coraza-audit.log
+            SecAuditLogParts ABIJDEFHZ
+            SecAuditEngine On
+            Include @owasp_crs/*.conf
+        `
+    }
+}
+
+# ─── SQLi Labs ─────────────────────────────────────────────────────────────────
+
+# App1 — ShopFlow (VULN-1 a 4)
+:8081 {
+    import coraza_detection
+    reverse_proxy sqli_app1:8081 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# App2 — LibroBase (VULN-5 a 8)
+:8082 {
+    import coraza_detection
+    reverse_proxy sqli_app2:8082 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# App3 — NewsHub (VULN-9 a 12)
+:8083 {
+    import coraza_detection
+    reverse_proxy sqli_app3:8083 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# App4 — StaffPortal (VULN-13 a 16)
+:8084 {
+    import coraza_detection
+    reverse_proxy sqli_app4:8084 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# App5 — StockTrack (VULN-17 a 18)
+:8085 {
+    import coraza_detection
+    reverse_proxy sqli_app5:8085 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# ─── NoSQL Labs (portas remapeadas para evitar conflito) ───────────────────────
+
+# App1 — CipherNote (VULN-A e B)  →  acesso via :9081
+:9081 {
+    import coraza_detection
+    reverse_proxy nosql_app1:8081 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# App2 — PeopleDir (VULN-C e D)  →  acesso via :9082
+:9082 {
+    import coraza_detection
+    reverse_proxy nosql_app2:8082 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}

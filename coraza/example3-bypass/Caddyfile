@@ -1,0 +1,129 @@
+{
+    order coraza_waf first
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# EXEMPLO 3 — WAF MAL CONFIGURADO (BYPASS POSSÍVEL)
+#
+# Este Caddyfile simula um cenário real onde o administrador fez 3 ajustes
+# comuns para "resolver falsos positivos" — e criou brechas sérias.
+#
+# MISCONFIG-1: Parâmetros vulneráveis excluídos das regras de SQLi
+# MISCONFIG-2: Threshold de anomaly score elevado para 100
+# MISCONFIG-3: Body JSON não inspecionado (NoSQL bypass)
+#
+# Veja misconfiguration.md para a explicação completa.
+# Veja attack.md para o passo a passo do bypass.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+(coraza_misconfigured) {
+    coraza_waf {
+        load_owasp_crs
+        directives `
+            Include @coraza.conf-recommended
+            Include @crs-setup.conf.example
+
+            # Modo bloqueio — parece seguro à primeira vista
+            SecRuleEngine On
+
+            # Logging
+            SecAuditEngine RelevantOnly
+            SecAuditLog /var/log/caddy/coraza-audit.log
+            SecAuditLogParts ABIJDEFHZ
+
+            # ── MISCONFIG-1 ────────────────────────────────────────────────────
+            # "Os parâmetros de busca disparavam muitos alertas falsos no painel
+            #  de monitoramento, então excluímos eles das regras de SQLi."
+            #
+            # Problema: os mesmos parâmetros são os pontos de injeção das apps.
+            # Qualquer SQLi em category, genre, q, tag, name, dept, id, sku
+            # passa sem bloqueio.
+            SecRuleRemoveById 942100 942110 942120 942130 942140 942150 942160 942170 942180 942190 942200 942210 942220 942230 942240 942250 942260 942270 942280 942290 942300 942310 942320 942330 942340 942350 942360 942370 942380 942390 942400 942410 942420 942421 942430 942431 942432 942440 942450 942460 942470 942480 942490 942500 942510 942520
+
+            # ── MISCONFIG-2 ────────────────────────────────────────────────────
+            # "Em produção tínhamos muitos 403 inesperados, então aumentamos o
+            #  threshold para parar de bloquear até calibrarmos melhor."
+            #
+            # Problema: um ataque SQLi típico pontua 5-25. Com threshold=100
+            # o WAF nunca chega a bloquear nada — está ligado, mas inerte.
+            SecAction \
+                "id:900000,phase:1,nolog,pass,t:none,\
+                setvar:tx.paranoia_level=1"
+            SecAction \
+                "id:900110,phase:1,nolog,pass,t:none,\
+                setvar:tx.inbound_anomaly_score_threshold=100,\
+                setvar:tx.outbound_anomaly_score_threshold=100"
+
+            # ── MISCONFIG-3 ────────────────────────────────────────────────────
+            # "A API do app de notas usa JSON e estava quebrando com falsos
+            #  positivos, então desligamos a inspeção de body JSON."
+            #
+            # Problema: os apps NoSQL (CipherNote e PeopleDir) recebem
+            # credenciais via JSON. Operadores MongoDB como {"$ne":null}
+            # chegam direto ao backend sem inspeção.
+            SecRule REQUEST_HEADERS:Content-Type "@beginsWith application/json" \
+                "id:9990,\
+                phase:1,\
+                pass,\
+                nolog,\
+                ctl:ruleEngine=DetectionOnly,\
+                msg:'JSON body inspection disabled by admin'"
+
+            Include @owasp_crs/*.conf
+        `
+    }
+}
+
+# ─── SQLi Labs ─────────────────────────────────────────────────────────────────
+
+:8081 {
+    import coraza_misconfigured
+    reverse_proxy sqli_app1:8081 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+:8082 {
+    import coraza_misconfigured
+    reverse_proxy sqli_app2:8082 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+:8083 {
+    import coraza_misconfigured
+    reverse_proxy sqli_app3:8083 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+:8084 {
+    import coraza_misconfigured
+    reverse_proxy sqli_app4:8084 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+:8085 {
+    import coraza_misconfigured
+    reverse_proxy sqli_app5:8085 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+# ─── NoSQL Labs ────────────────────────────────────────────────────────────────
+
+:9081 {
+    import coraza_misconfigured
+    reverse_proxy nosql_app1:8081 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+:9082 {
+    import coraza_misconfigured
+    reverse_proxy nosql_app2:8082 {
+        header_up X-Real-IP {remote_host}
+    }
+}
+

@@ -1,0 +1,141 @@
+{
+    order coraza_waf first
+}
+
+# ─── Snippet reutilizável: Coraza em modo PREVENÇÃO (bloqueia ataques) ─────────
+(coraza_prevention) {
+    coraza_waf {
+        load_owasp_crs
+        directives `
+            Include @coraza.conf-recommended
+            Include @crs-setup.conf.example
+
+            # ── Modo Bloqueio ──────────────────────────────────────────────────
+            SecRuleEngine On
+
+            # ── Logging ───────────────────────────────────────────────────────
+            SecAuditLog /var/log/caddy/coraza-audit.log
+            SecAuditLogParts ABIJDEFHZ
+            SecAuditEngine RelevantOnly
+
+            # ── Tuning: limiar de pontuação CRS ───────────────────────────────
+            # Paranoia level 1 (default) — bom balanço para lab
+            SecAction \
+                "id:900000,\
+                phase:1,\
+                nolog,\
+                pass,\
+                t:none,\
+                setvar:tx.paranoia_level=1"
+
+            SecAction \
+                "id:900110,\
+                phase:1,\
+                nolog,\
+                pass,\
+                t:none,\
+                setvar:tx.inbound_anomaly_score_threshold=5,\
+                setvar:tx.outbound_anomaly_score_threshold=4"
+
+            # ── Proteção extra para NoSQL (operadores MongoDB) ─────────────────
+            SecRule ARGS "@rx \$(?:ne|gt|lt|gte|lte|in|nin|regex|where|exists|all|size|type|mod|text|near|geoWithin|geoIntersects|elemMatch|not|nor|or|and)\b" \
+                "id:9000001,\
+                phase:2,\
+                block,\
+                msg:'NoSQL Operator Injection Attempt',\
+                logdata:'Matched Data: %{MATCHED_VAR} in %{MATCHED_VAR_NAME}',\
+                tag:'attack-nosql',\
+                severity:'CRITICAL'"
+
+            SecRule REQUEST_BODY "@rx \$(?:ne|gt|lt|gte|lte|in|nin|regex|where|exists)\b" \
+                "id:9000002,\
+                phase:2,\
+                block,\
+                msg:'NoSQL Operator Injection in Request Body',\
+                logdata:'Matched Data: %{MATCHED_VAR}',\
+                tag:'attack-nosql',\
+                severity:'CRITICAL'"
+
+            # ── Proteção extra para XML encoding bypass (VULN-18) ─────────────
+            SecRule ARGS "@rx (?:&#x27;|&#39;|&apos;)" \
+                "id:9000003,\
+                phase:2,\
+                block,\
+                msg:'HTML/XML Entity Encoding SQLi Bypass Attempt',\
+                logdata:'Matched Data: %{MATCHED_VAR}',\
+                tag:'attack-sqli-bypass',\
+                severity:'ERROR'"
+
+            SecRule REQUEST_BODY "@rx (?i)(?:&#x27;|&#x22;|&#x3e;|&#x3c;|&#39;|&#34;)" \
+                "id:9000004,\
+                phase:2,\
+                block,\
+                msg:'HTML/XML Entity Encoding in Request Body (SQLi Bypass)',\
+                logdata:'Matched: %{MATCHED_VAR}',\
+                tag:'attack-sqli-xml',\
+                severity:'CRITICAL'"
+
+            Include @owasp_crs/*.conf
+        `
+    }
+}
+
+# ─── SQLi Labs ─────────────────────────────────────────────────────────────────
+
+:8081 {
+    import coraza_prevention
+    reverse_proxy sqli_app1:8081 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+:8082 {
+    import coraza_prevention
+    reverse_proxy sqli_app2:8082 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+:8083 {
+    import coraza_prevention
+    reverse_proxy sqli_app3:8083 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+:8084 {
+    import coraza_prevention
+    reverse_proxy sqli_app4:8084 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+:8085 {
+    import coraza_prevention
+    reverse_proxy sqli_app5:8085 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# ─── NoSQL Labs ────────────────────────────────────────────────────────────────
+
+:9081 {
+    import coraza_prevention
+    reverse_proxy nosql_app1:8081 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+:9082 {
+    import coraza_prevention
+    reverse_proxy nosql_app2:8082 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}

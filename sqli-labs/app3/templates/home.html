@@ -1,0 +1,67 @@
+{{define "home.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NewsHub – Breaking News & Analysis</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">News<span>Hub</span></a>
+  <nav>
+    <a href="/articles?cat=Politics">Politics</a>
+    <a href="/articles?cat=Technology">Technology</a>
+    <a href="/articles?cat=Economy">Economy</a>
+    <a href="/tags?tag=breaking">Breaking</a>
+    <a href="/comment" class="cta">Discuss</a>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="hero-tag">Latest</span>
+      <h1>Stay Ahead of the Story</h1>
+      <p>Trusted journalism, in-depth analysis and real-time updates from around the world.</p>
+      <a href="/articles?cat=Technology" class="btn btn-accent">Read Today's Top Stories</a>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Recent Articles</h2>
+    <a href="/articles?cat=Politics">All Categories →</a>
+  </div>
+
+  <div class="grid">
+    {{range .Data}}
+    <div class="card">
+      <div class="card-cat">{{index . 2}}</div>
+      <div class="card-body">
+        <h3><a href="/article?id={{index . 0}}">{{index . 1}}</a></h3>
+        <div class="card-meta">By {{index . 3}} &nbsp;·&nbsp; {{index . 4}}</div>
+      </div>
+    </div>
+    {{else}}
+    <p class="empty">No articles published yet.</p>
+    {{end}}
+  </div>
+
+  <div class="tags-row">
+    <h3>Popular Tags</h3>
+    <div class="tag-cloud">
+      <a href="/tags?tag=breaking" class="tag-chip">breaking</a>
+      <a href="/tags?tag=politics" class="tag-chip">politics</a>
+      <a href="/tags?tag=tech" class="tag-chip">tech</a>
+      <a href="/tags?tag=economy" class="tag-chip">economy</a>
+      <a href="/tags?tag=world" class="tag-chip">world</a>
+      <a href="/tags?tag=climate" class="tag-chip">climate</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <p>© 2024 NewsHub Media Group &nbsp;|&nbsp; <a href="/docs">Editorial Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

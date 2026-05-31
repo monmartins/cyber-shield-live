@@ -1,0 +1,59 @@
+{{define "comment.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – NewsHub</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">News<span>Hub</span></a>
+  <nav>
+    <a href="/articles?cat=Politics">Politics</a>
+    <a href="/articles?cat=Technology">Technology</a>
+    <a href="/articles?cat=Economy">Economy</a>
+    <a href="/tags?tag=breaking">Breaking</a>
+    <a href="/comment" class="cta active">Discuss</a>
+  </nav>
+</header>
+<main>
+  <div class="form-page">
+    <h1>Join the Discussion</h1>
+    <p class="form-subtitle">Share your perspective on the latest stories.</p>
+
+    {{if .Message}}
+    <div class="alert alert-success flash">{{.Message}}</div>
+    {{end}}
+    {{if .Error}}
+    <div class="alert alert-error">{{.Error}}</div>
+    {{end}}
+
+    <form class="auth-form" method="post" action="/comment">
+      <div class="field">
+        <label>Article</label>
+        <select name="article_id">
+          {{range .Data}}
+          <option value="{{.}}">Article #{{.}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" name="author" placeholder="e.g. Jane Doe" required>
+      </div>
+      <div class="field">
+        <label>Comment</label>
+        <textarea name="content" rows="5" placeholder="Write your thoughts here…" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-accent btn-full">Submit Comment</button>
+    </form>
+  </div>
+</main>
+<footer>
+  <p>© 2024 NewsHub Media Group &nbsp;|&nbsp; <a href="/docs">Editorial Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}

